@@ -2,37 +2,55 @@
 // SKAPA EGET NAMN_API
 
 // steg 1 - ange lämpliga HTTP-headers------------------------------------------
-//lär mer här: https://stackoverflow.com/questions/10636611/how-does-access-control-allow-origin-header-work
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET");
 header("Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept");
 header("Referrer-Policy: no-referrer");
 header("Content-Type: application/json; charset=UTF-8");
 
-
 // steg 2 - skapa arrayer -------------------------------------------------------
 $firstNames =
-    ["Sara", "Alex", "Glen", "Glennifer", "Molly", "F6", "F7", "F8", "F9", "F10"];
+    ["Sara" => "female", "Alex" => "male", "Glen" => "male", "Glennifer" => "female", "Molly" => "female", "Göran" => "male"];
 $lastNames =
-    ["Öberg", "Viktorsson", "Glensson", "L4", "L5", "L6", "L7", "L8", "L9", "L10"];
+    ["Eriksson", "Viktorsson", "Glensson", "Kattsson", "Svensson"];
 
 
 //steg 3 - skapa 10 namn och sara i ny array ------------------------------------
-$names = array();
+function replaceChar($string)
+{
+    return preg_replace('~&([a-z]{1,2})(acute|cedil|circ|grave|lig|orn|ring|slash|th|tilde|uml);~i', '$1', htmlentities($string, ENT_QUOTES, 'UTF-8'));
+}
 
+function createEmail($first, $last)
+{
+    $updated_first = replaceChar($first);
+    $updated_last = replaceChar($last);
+    $email = substr($updated_first, 0, 2) . strtolower(substr($updated_last, 0, 3)) . "@email.com";
+    return $email;
+}
+
+$names = array();
 for ($i = 0; $i < 10; $i++) {
+
+    $first = array_rand($firstNames);
+    $last = $lastNames[rand(0, 4)];
+    $gender = $firstNames[$first];
+    $age = rand(1, 100);
+    $email = createEmail($first, $last);
+
     $name = array(
-        "firstname" => $firstNames[rand(0, 9)],
-        "lastname" => $lastNames[rand(0, 9)]
+        "firstname" => $first,
+        "lastame" => $last,
+        "gender" => $gender,
+        "age" => $age,
+        "email" => $email
     );
     array_push($names, $name);
 }
-//testar. behöver ej använda <pre> eftersom headern säger att resultatet inte är html, utan json. 
-// print_r($names); 
-
+// print_r($names);
 
 //steg 4 - konvertera PHP-arrayen ($names) till JSON -----------------------------
-$json = json_encode($names, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT); // första av dessa viktigast. (den löser problem med svenska tecken bland annat). prettyprint ger snyggare utskrift i responsen.
+$json = json_encode($names, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
 
 
 //steg 5 - Skicka JSON till klienten. --------------------------------------------
